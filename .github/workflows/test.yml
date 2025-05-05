@@ -22,15 +22,6 @@ jobs:
       - name: Install xvfb
         run: sudo apt-get install xvfb
 
-      - name: Clean up system temp and user cache
-        run: |
-          rm -rf ~/.cache/*
-          rm -rf /tmp/*
-
-      - name: Clear pip cache
-        run: |
-          pip cache purge || true
-
       - name: Running the Python script
         run: xvfb-run python "${{ github.workspace }}/Round1.py"
         
