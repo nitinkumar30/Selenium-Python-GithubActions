@@ -23,7 +23,7 @@ jobs:
         run: sudo apt-get install xvfb
 
       - name: Running the Python script
-        run: python Round1.py
+        run: xvfb-run python "${{ github.workspace }}/Round1.py"
         
       - name: Commit and Push The Results From Python Selenium Action
         run: |
