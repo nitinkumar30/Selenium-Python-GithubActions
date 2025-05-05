@@ -16,23 +16,32 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Update system and install dependencies
+      - name: Install dependencies (Chrome, ChromeDriver, Selenium)
+      
         run: |
-          sudo apt-get update -y
-          
-          # Install Google Chrome
+          sudo apt-get update
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo apt install -y ./google-chrome-stable_current_amd64.deb
-          
-          # Install matching ChromeDriver
+      
           CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+' | head -1)
+          if [ -z "$CHROME_VERSION" ]; then
+            echo "Failed to determine Chrome version"
+            exit 1
+          fi
+      
           DRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
+          if [ -z "$DRIVER_VERSION" ]; then
+            echo "Failed to determine ChromeDriver version"
+            exit 1
+          fi
+      
           wget -O chromedriver.zip "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
           unzip chromedriver.zip
           sudo mv chromedriver /usr/local/bin/
           sudo chmod +x /usr/local/bin/chromedriver
-
-          # Install Xvfb and other dependencies
+      
+          pip install --upgrade pip
+          pip install selenium pyvirtualdisplay
           sudo apt-get install -y xvfb
           
           # Install Python dependencies
