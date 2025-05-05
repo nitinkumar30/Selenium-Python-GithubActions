@@ -1,0 +1,53 @@
+name: Run Selenium On GitHub Action
+
+on:
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies (Chrome, ChromeDriver, Selenium)
+        run: |
+          sudo apt-get update
+          
+          # Install Google Chrome
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt install -y ./google-chrome-stable_current_amd64.deb
+          
+          # Find Chrome version
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+' | head -1)
+          
+          # Install matching ChromeDriver
+          DRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
+          wget -O chromedriver.zip "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
+          unzip chromedriver.zip
+          sudo mv chromedriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/chromedriver
+
+          # Install Python dependencies
+          pip install --upgrade pip
+          pip install selenium pyvirtualdisplay
+
+          # Install Xvfb for headless GUI
+          sudo apt-get install -y xvfb
+
+      - name: Run Selenium script using Xvfb
+        run: xvfb-run python Round1.py
+
+      - name: Commit and push results (if any)
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "GitHub Actions Results added" || echo "No changes to commit"
+          git push
