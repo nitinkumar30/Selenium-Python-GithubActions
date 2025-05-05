@@ -43,8 +43,3 @@ try:
 finally:
     driver.quit()
 
-
-    print(f"Difficulty level for round {i} is {difficulty_level}.")
-
-
-driver.quit()
